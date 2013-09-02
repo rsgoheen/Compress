@@ -7,54 +7,93 @@ using System.Threading.Tasks;
 
 namespace Compress.Core
 {
-   class HuffmanTree<T>
+   public class HuffmanTree<T>
    {
-      public HuffmanNode<T> Root { get; set; } 
+      public HuffmanNode<T> Root { get; private set; }
+      public Dictionary<T, int> FrequencyDictionary { get; private set; }
 
-      public HuffmanTree(Dictionary<T, int> frequencyDictionary)
+      private readonly Dictionary<T, HuffmanNode<T>> _nodeDictionary = new Dictionary<T, HuffmanNode<T>>();
+
+      public HuffmanTree(IDictionary<T, int> frequencyDictionary)
       {
-         var sortedNodes = new Queue<HuffmanNode<T>>( frequencyDictionary.Keys.Count );
+         FrequencyDictionary = new Dictionary<T, int>(frequencyDictionary);
 
-         foreach (var item in frequencyDictionary.OrderBy( x => x.Value))
-            sortedNodes.Enqueue(new HuffmanNode<T>() {Value = item.Key, Weight = item.Value});
+         var sortedNodes = new SortedSet<HuffmanNode<T>>();
+
+         foreach (var item in frequencyDictionary.OrderBy(x => x.Value))
+         {
+            var node = new HuffmanNode<T>() {Value = item.Key, Weight = item.Value};
+            sortedNodes.Add(node);
+            _nodeDictionary.Add(node.Value, node);
+         }
 
          while (sortedNodes.Count() > 1)
          {
-            // Note: should use a priority queue implementation, but close enough for now.
-            if (sortedNodes.Count >= 2)
+            var left = sortedNodes.Min;
+            sortedNodes.Remove(left);
+            var right = sortedNodes.Min;
+            sortedNodes.Remove(right);
+
+            var parent = new HuffmanNode<T>()
             {
-               var left = sortedNodes.Dequeue();
-               var right = sortedNodes.Dequeue();
+               Value = default(T),
+               Weight = left.Weight + right.Weight,
+               LeftNode = left,
+               RightNode = right
+            };
 
-               var parent = new HuffmanNode<T>()
-                  {
-                     Value = default(T),
-                     Weight = left.Weight + right.Weight,
-                     LeftNode = left,
-                     RightNode = right
-                  };
+            left.Parent = parent;
+            right.Parent = parent;
 
-               sortedNodes.Enqueue(parent);
-            }
+            sortedNodes.Add(parent);
          }
 
-         Root = sortedNodes.Dequeue();
-         
-         throw new NotImplementedException();
+         Root = sortedNodes.FirstOrDefault();
       }
 
-      public BitArray Encode(string input)
+      public BitArray Encode(IEnumerable<T> input)
       {
          var list = new List<bool>();
 
-         BitArray bitlist = new BitArray(list.ToArray());
+         foreach (var item in input)
+         {
+            list.AddRange(EncodeElement(item));
+         }
 
-         throw new NotImplementedException();
+         return new BitArray(list.ToArray());
+      }
+
+      private IEnumerable<bool> EncodeElement(T item)
+      {
+         var list = new List<bool>();
+         var node = _nodeDictionary[item];
+
+         while (!node.IsRoot)
+         {
+            list.Add(node.Parent.LeftNode == node);
+            node = node.Parent;
+         }
+
+         list.Reverse();
+         return list;
       }
 
       public string Decode(BitArray input)
       {
-         throw new NotImplementedException();
+         var sb = new StringBuilder();
+         var node = Root;
+
+         for (var i = 0; i < input.Length; i++ )
+         {
+            node = input[i] ? node.LeftNode : node.RightNode;
+
+            if (!node.IsLeaf) continue;
+
+            sb.Append(node.Value);
+            node = Root;
+         }
+
+         return sb.ToString();
       }
 
 
