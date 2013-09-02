@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compress.Core", "Compress.Core\Compress.Core.csproj", "{3E5E2D04-96BB-4040-8AE7-9CF775FC7986}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compress", "Compress\Compress.csproj", "{1319224A-3A4E-4128-B39D-A0D12D352205}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compress.Core.Test", "Compress.Core.Test\Compress.Core.Test.csproj", "{207BD7FE-BDDA-4860-8ED6-5A8016C1F67E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E5E2D04-96BB-4040-8AE7-9CF775FC7986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5E2D04-96BB-4040-8AE7-9CF775FC7986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5E2D04-96BB-4040-8AE7-9CF775FC7986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5E2D04-96BB-4040-8AE7-9CF775FC7986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1319224A-3A4E-4128-B39D-A0D12D352205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1319224A-3A4E-4128-B39D-A0D12D352205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1319224A-3A4E-4128-B39D-A0D12D352205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1319224A-3A4E-4128-B39D-A0D12D352205}.Release|Any CPU.Build.0 = Release|Any CPU
+		{207BD7FE-BDDA-4860-8ED6-5A8016C1F67E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{207BD7FE-BDDA-4860-8ED6-5A8016C1F67E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{207BD7FE-BDDA-4860-8ED6-5A8016C1F67E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{207BD7FE-BDDA-4860-8ED6-5A8016C1F67E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
