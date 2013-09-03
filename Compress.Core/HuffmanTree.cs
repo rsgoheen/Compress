@@ -22,7 +22,7 @@ namespace Compress.Core
 
          foreach (var item in frequencyDictionary.OrderBy(x => x.Value))
          {
-            var node = new HuffmanNode<T>() {Value = item.Key, Weight = item.Value};
+            var node = new HuffmanNode<T>() { Value = item.Key, Weight = item.Value };
             sortedNodes.Add(node);
             _nodeDictionary.Add(node.Value, node);
          }
@@ -51,26 +51,24 @@ namespace Compress.Core
          Root = sortedNodes.FirstOrDefault();
       }
 
-      public BitArray Encode(IEnumerable<T> input)
+      public List<byte> Encode(IEnumerable<T> input)
       {
-         var list = new List<bool>();
+         var list = new List<byte>();
 
          foreach (var item in input)
-         {
             list.AddRange(EncodeElement(item));
-         }
 
-         return new BitArray(list.ToArray());
+         return list;
       }
 
-      private IEnumerable<bool> EncodeElement(T item)
+      private IEnumerable<byte> EncodeElement(T item)
       {
-         var list = new List<bool>();
+         var list = new List<byte>();
          var node = _nodeDictionary[item];
 
          while (!node.IsRoot)
          {
-            list.Add(node.Parent.LeftNode == node);
+            list.Add(node.Parent.LeftNode == node ? (byte)1 : (byte)0);
             node = node.Parent;
          }
 
@@ -78,14 +76,14 @@ namespace Compress.Core
          return list;
       }
 
-      public string Decode(BitArray input)
+      public string Decode(IEnumerable<byte> input)
       {
          var sb = new StringBuilder();
          var node = Root;
 
-         for (var i = 0; i < input.Length; i++ )
+         foreach (var b in input)
          {
-            node = input[i] ? node.LeftNode : node.RightNode;
+            node = (b == 1) ? node.LeftNode : node.RightNode;
 
             if (!node.IsLeaf) continue;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,14 @@ namespace Compress.Core
 {
     public class Compress
     {
+
+       public static void CompressFile(string inputFile, string outputFile)
+       {
+          var input = File.ReadAllText(inputFile);
+
+          var bytes = System.Text.Encoding.ASCII.GetBytes(outputFile);
+          var str = System.Text.Encoding.ASCII.GetString(bytes);
+       }
 
        public static Dictionary<char, int> CreateDictionary (string input)
        {

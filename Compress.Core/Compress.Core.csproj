@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compress.cs" />
+    <Compile Include="FrequencyDictionary.cs" />
     <Compile Include="HuffmanNode.cs" />
     <Compile Include="HuffmanTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
