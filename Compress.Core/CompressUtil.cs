@@ -9,14 +9,6 @@ namespace Compress.Core
 {
     public class CompressUtil
     {
-       public static void CompressFile(string inputFile, string outputFile)
-       {
-          var input = File.ReadAllText(inputFile);
-
-          var bytes = Encoding.ASCII.GetBytes(outputFile);
-          var str = Encoding.ASCII.GetString(bytes);
-       }
-
        /// <summary>
        /// Takes the header (dictionary) and Huffman encoded input and creates a single
        /// byte array that can be persisted.

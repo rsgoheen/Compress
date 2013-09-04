@@ -54,16 +54,26 @@ namespace Compress.Core
          return dict;
       }
 
+      /// <summary>
+      /// Get the keys in the dictionary as a byte[] array that can be used to create a new dictionary
+      /// </summary>
       public byte[] GetKeysAsByteArray()
       {
          return Encoding.ASCII.GetBytes(new string(Keys.ToArray()));
       }
 
+      /// <summary>
+      /// Get the values in the dictionary as a byte[] array that can be used to create a new dictionary
+      /// </summary>
       public byte[] GetValuesAsByteArray()
       {
          return Encoding.ASCII.GetBytes(String.Join(",", Values.Select(x => x.ToString()).ToArray()));
       }
 
+      /// <summary>
+      /// Retrieves the dictionary information in a format that can be persisted for
+      /// later use in creating a new dictionary.
+      /// </summary>
       public static byte[] GetHeaderByteArray(CharacterFrequencyDictionary dict)
       {
          var dictKeys = dict.GetKeysAsByteArray();

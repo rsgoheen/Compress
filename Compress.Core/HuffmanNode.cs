@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Compress.Core
 {
+   /// <summary>
+   /// Encapsulates a node in a tree.  A node can either be a leaf with a value, or an empty node with
+   /// child nodes.
+   /// </summary>
    public class HuffmanNode<T> : IEquatable<HuffmanNode<T>>, IComparer<HuffmanNode<T>>, IComparable<HuffmanNode<T>>
    {
       public int Weight { get; set; }
@@ -14,11 +18,17 @@ namespace Compress.Core
       public HuffmanNode<T> RightNode { get; set; }
       public HuffmanNode<T> Parent { get; set; } 
 
+      /// <summary>
+      /// True if this is a leaf node containing a value (has no child nodes)
+      /// </summary>
       public bool IsLeaf
       {
          get { return LeftNode == null && RightNode == null; }
       }
 
+      /// <summary>
+      /// True if this is the top node of a tree (has no parents)
+      /// </summary>
       public bool IsRoot
       {
          get { return Parent == null; }

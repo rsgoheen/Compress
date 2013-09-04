@@ -7,17 +7,21 @@ using System.Threading.Tasks;
 
 namespace Compress.Core
 {
+   /// <summary>
+   /// Data structure representing a tree comprised of <see cref="HuffingtonNode"/>
+   /// </summary>
+   /// <typeparam name="T"></typeparam>
    public class HuffmanTree<T>
    {
+      /// <summary>
+      /// The top node of the tree
+      /// </summary>
       public HuffmanNode<T> Root { get; private set; }
-      public Dictionary<T, int> FrequencyDictionary { get; private set; }
 
       private readonly Dictionary<T, HuffmanNode<T>> _nodeDictionary = new Dictionary<T, HuffmanNode<T>>();
 
       public HuffmanTree(IDictionary<T, int> frequencyDictionary)
       {
-         FrequencyDictionary = new Dictionary<T, int>(frequencyDictionary);
-
          var sortedNodes = new SortedSet<HuffmanNode<T>>();
 
          foreach (var item in frequencyDictionary.OrderBy(x => x.Value))
@@ -51,6 +55,9 @@ namespace Compress.Core
          Root = sortedNodes.FirstOrDefault();
       }
 
+      /// <summary>
+      /// Encode the given input string into an array of bits
+      /// </summary>
       public byte[] Encode(IEnumerable<T> input)
       {
          var list = new List<byte>();
@@ -76,6 +83,9 @@ namespace Compress.Core
          return list;
       }
 
+      /// <summary>
+      /// Decode the given array of bits into a string
+      /// </summary>
       public string Decode(IEnumerable<byte> input)
       {
          var sb = new StringBuilder();
