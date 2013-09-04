@@ -12,6 +12,7 @@ namespace Compress
    class Program
    {
       private const string _compressFileExtension = ".compress";
+      private const string _decompressFileExtension = ".decompress";
       public static Encoding Encoding = Encoding.ASCII;
 
       static void Main(string[] args)
@@ -31,10 +32,16 @@ namespace Compress
             }
 
             if (String.Equals(args[0].Substring(1, 1), "c", StringComparison.OrdinalIgnoreCase))
-               CompressFile(args[1]);
+            {
+               var outputFile = args.Length > 2 ? args[2] : args[1] + _compressFileExtension;
+               CompressFile(args[1], outputFile);
+            }
 
             if (String.Equals(args[0].Substring(1, 1), "d", StringComparison.OrdinalIgnoreCase))
-               DecompressFile(args[1]);
+            {
+               var outputFile = args.Length > 2 ? args[2] : args[1] + _decompressFileExtension;
+               DecompressFile(args[1], outputFile);
+            }
 
          }
          catch (FileNotFoundException ex)
@@ -47,9 +54,9 @@ namespace Compress
          }
       }
 
-      private static void ShowDictionaryKeyAndValueStrings(string filename)
+      private static void ShowDictionaryKeyAndValueStrings(string inputFilename)
       {
-         var input = String.Join(Environment.NewLine, File.ReadAllText(filename, Encoding));
+         var input = String.Join(Environment.NewLine, File.ReadAllText(inputFilename, Encoding));
          var dict = CharacterFrequencyDictionary.CreateDictionary(input);
          Console.WriteLine("Keys:");
          Console.WriteLine(Convert.ToBase64String(dict.GetKeysAsByteArray()));
@@ -61,25 +68,32 @@ namespace Compress
          return;
       }
 
-      private static void CompressFile(string inputFile)
+      private static void CompressFile(string inputFile, string outputFilename)
       {
-         var outputFile = inputFile + _compressFileExtension;
+         Console.WriteLine("Compressing file {0} to {1}", inputFile, outputFilename);
 
-         var input = String.Join(System.Environment.NewLine, File.ReadAllText(inputFile, Encoding));
+         var input = String.Join(Environment.NewLine, File.ReadAllText(inputFile, Encoding));
 
          var dict = CharacterFrequencyDictionary.CreateDictionary(input);
 
-         var fileHeader = CompressUtil.GetHeaderByteArray(dict);
+         var fileHeader = CharacterFrequencyDictionary.GetHeaderByteArray(dict);
          var compressed = new HuffmanTree<char>(dict).Encode(input);
          var fileByteArray = CompressUtil.GetFileByteArray(fileHeader, compressed);
 
-         using (var fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+         using (var fs = new FileStream(outputFilename, FileMode.Create, FileAccess.Write))
             fs.Write(fileByteArray, 0, fileByteArray.Length);
+
+         Console.WriteLine("Compression complete.");
       }
 
-      public static void DecompressFile(string fileName)
+      public static void DecompressFile(string inputfilename, string outputFilename)
       {
-         using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+         Console.WriteLine("Decompressing file {0} to {1}", inputfilename, outputFilename);
+
+         HuffmanTree<char> huffmanTree;
+         var encodedStream = new List<byte>();
+
+         using (var fs = new FileStream(inputfilename, FileMode.Open, FileAccess.Read))
          {
             var keyLengthArray = new byte[4];
             var valueLengthArray = new byte[4];
@@ -96,22 +110,27 @@ namespace Compress
             fs.Read(keyArray, 0, keyLength);
             fs.Read(valueArray, 0, valueLength);
 
-            var dict = CharacterFrequencyDictionary.CreateDictionaryFromByteArray(keyArray, valueArray);
+            var compressedLengthArray = new byte[4];
+            fs.Read(compressedLengthArray, 0, 4);
+            var compressedLength = BitConverter.ToInt32(compressedLengthArray, 0);
 
-            var huffmanTree = new HuffmanTree<char>(dict);
+            var dict = CharacterFrequencyDictionary.CreateDictionary(keyArray, valueArray);
+            huffmanTree = new HuffmanTree<char>(dict);
 
-            var outputFile = fileName.Substring(0, (fileName.Length - _compressFileExtension.Length));
-
-            var encodedStream = new List<byte>();
             int record;
-
             while ((record = fs.ReadByte()) != -1)
-               encodedStream.AddRange(CompressUtil.ConvertToBitArray(record));
+               encodedStream.AddRange(CompressUtil.ConvertToBitArray((byte)record));
 
-            using (var fsw = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
-            using (var sr = new StreamWriter(fsw))
-               sr.Write(huffmanTree.Decode(encodedStream));
+            if (encodedStream.Count() > compressedLength)
+               encodedStream.RemoveRange(compressedLength, encodedStream.Count() - compressedLength);
          }
+
+
+         using (var fsw = new FileStream(outputFilename, FileMode.Create, FileAccess.Write))
+         using (var sr = new StreamWriter(fsw))
+            sr.Write(huffmanTree.Decode(encodedStream));
+
+         Console.WriteLine("Compression complete.");
       }
 
       public static void ShowHelp()

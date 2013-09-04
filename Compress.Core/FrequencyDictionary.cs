@@ -8,6 +8,12 @@ namespace Compress.Core
 {
    public class CharacterFrequencyDictionary : Dictionary<char, int>
    {
+      /// <summary>
+      /// Create a character frequency dictionary given a string
+      /// </summary>
+      /// <param name="input"></param>
+      /// <returns>A dictionary with the key being characters in the input string and the values
+      /// being the number of times the character appears in the input string</returns>
       public static CharacterFrequencyDictionary CreateDictionary(string input)
       {
          var dict = new CharacterFrequencyDictionary();
@@ -23,14 +29,22 @@ namespace Compress.Core
          return dict;
       }
 
-      public static CharacterFrequencyDictionary CreateDictionaryFromByteArray(byte[] keyArray, byte[] valueArray)
+      /// <summary>
+      /// create a character frequency dictionary given byte arrays representing the keys
+      /// and the values.  Intended to be used with the output of <see cref="GetKeysAsByteArray"/> and
+      /// <see cref="GetValuesAsByteArray"/>.
+      /// </summary>
+      /// <param name="keyArray">The dictionary keys as a byte array from <see cref="GetKeysAsByteArray"/></param>
+      /// <param name="valueArray">The dictonary values as a byte array from <see cref="GetKeysAsByteArray"/></param>
+      /// <returns></returns>
+      public static CharacterFrequencyDictionary CreateDictionary(byte[] keyArray, byte[] valueArray)
       {
          var keys = Encoding.ASCII.GetString(keyArray).ToCharArray();
-         var values = Encoding.ASCII.GetString(valueArray).Split(',').Select(int.Parse).ToArray();
+         var values = Encoding.ASCII.GetString(valueArray).Split(',').Select(Int32.Parse).ToArray();
 
          if (keys.Length != values.Length)
             throw new ArgumentException(
-               string.Format("Key array length ({0}) does not match value array length ({1}) ", keys.Length, values.Length));
+               String.Format("Key array length ({0}) does not match value array length ({1}) ", keys.Length, values.Length));
 
          var dict = new CharacterFrequencyDictionary();
 
@@ -48,6 +62,33 @@ namespace Compress.Core
       public byte[] GetValuesAsByteArray()
       {
          return Encoding.ASCII.GetBytes(String.Join(",", Values.Select(x => x.ToString()).ToArray()));
+      }
+
+      public static byte[] GetHeaderByteArray(CharacterFrequencyDictionary dict)
+      {
+         var dictKeys = dict.GetKeysAsByteArray();
+         var dictValues = dict.GetValuesAsByteArray();
+
+         var keyLength = BitConverter.GetBytes(dictKeys.Length);
+         var dictLength = BitConverter.GetBytes(dictValues.Length);
+
+         var headerLength = dictKeys.Length + dictValues.Length + keyLength.Length + dictLength.Length;
+
+         var fileHeader = new byte[headerLength];
+
+         int len = 0;
+
+         keyLength.CopyTo(fileHeader, len);
+         len += keyLength.Length;
+
+         dictLength.CopyTo(fileHeader, len);
+         len += dictLength.Length;
+
+         dictKeys.CopyTo(fileHeader, len);
+         len += dictKeys.Length;
+
+         dictValues.CopyTo(fileHeader, len);
+         return fileHeader;
       }
    }
 }

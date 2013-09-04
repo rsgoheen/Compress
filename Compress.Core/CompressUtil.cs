@@ -9,7 +9,6 @@ namespace Compress.Core
 {
     public class CompressUtil
     {
-
        public static void CompressFile(string inputFile, string outputFile)
        {
           var input = File.ReadAllText(inputFile);
@@ -18,45 +17,40 @@ namespace Compress.Core
           var str = Encoding.ASCII.GetString(bytes);
        }
 
-       public static byte[] GetHeaderByteArray(CharacterFrequencyDictionary dict)
-       {
-          var dictKeys = dict.GetKeysAsByteArray();
-          var dictValues = dict.GetValuesAsByteArray();
-
-          var keyLength = BitConverter.GetBytes(dictKeys.Length);
-          var dictLength = BitConverter.GetBytes(dictValues.Length);
-
-          var headerLength = dictKeys.Length + dictValues.Length + keyLength.Length + dictLength.Length;
-
-          var fileHeader = new byte[headerLength];
-
-          int len = 0;
-
-          keyLength.CopyTo(fileHeader, len);
-          len += keyLength.Length;
-
-          dictLength.CopyTo(fileHeader, len);
-          len += dictLength.Length;
-
-          dictKeys.CopyTo(fileHeader, len);
-          len += dictKeys.Length;
-
-          dictValues.CopyTo(fileHeader, len);
-          return fileHeader;
-       }
-
+       /// <summary>
+       /// Takes the header (dictionary) and Huffman encoded input and creates a single
+       /// byte array that can be persisted.
+       /// </summary>
+       /// <param name="fileHeader">The header information (frequency dictionary) as a byte array</param>
+       /// <param name="compressed">The bit array from the Huffman compression</param>
+       /// <returns>A byte array that can be persisted</returns>
        public static byte[] GetFileByteArray(byte[] fileHeader, byte[] compressed)
        {
+          var compressedLength = BitConverter.GetBytes(compressed.Length);
+
           var compressedByteArray = ConvertToByteArray(compressed);
 
-          var fileData = new byte[fileHeader.Length + compressedByteArray.Length];
+          var fileData = new byte[fileHeader.Length 
+             + compressedLength.Length 
+             + compressedByteArray.Length];
 
-          fileHeader.CopyTo(fileData, 0);
-          compressedByteArray.CopyTo(fileData, fileHeader.Length);
+          int len = 0;
+          fileHeader.CopyTo(fileData, len);
+
+          len += fileHeader.Length;
+          compressedLength.CopyTo(fileData, len);
+
+          len += compressedLength.Length;
+          compressedByteArray.CopyTo(fileData, len);
 
           return fileData;
        }
 
+       /// <summary>
+       /// Convert an array of bits into a (smaller) array of bytes
+       /// </summary>
+       /// <param name="bitArray">A byte array comprised of bit (0 and 1) values</param>
+       /// <returns>A byte array of smaller length than the input array</returns>
        public static byte[] ConvertToByteArray(byte[] bitArray)
        {
           var bytes = (bitArray.Length + 7)/8;
@@ -78,15 +72,20 @@ namespace Compress.Core
           return arr2;
        }
 
-       public static byte[] ConvertToBitArray(int record)
+       /// <summary>
+       /// Converts a byte into an array of bits (0 and 1 only).  Intended to be the converse
+       /// of <see cref="Compress.Core.CompressUtil.ConvertToByteArray"/>.
+       /// </summary>
+       /// <param name="byteItem">A byte to convert into an array of bit values</param>
+       /// <returns>A byte array containing only 0 and 1 as elements</returns>
+       public static byte[] ConvertToBitArray(byte byteItem)
        {
           var b = new byte[8];
-          var x = (byte) record;
 
           for (var i = 0; i < 8; i++)
           {
-             b[i] = (x%2 == 0) ? (byte) 0 : (byte) 1;
-             x = (byte) (x >> 1);
+             b[i] = (byteItem % 2 == 0) ? (byte)0 : (byte)1;
+             byteItem = (byte)(byteItem >> 1);
           }
           return b;
        }
