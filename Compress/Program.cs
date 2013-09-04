@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Compress
 {
    class Program
    {
+      private const string _compressFileExtension = ".compress";
       public static Encoding Encoding = Encoding.ASCII;
 
       static void Main(string[] args)
@@ -24,14 +26,15 @@ namespace Compress
          {
             if (String.Equals(args[0].Substring(1, 1), "g", StringComparison.OrdinalIgnoreCase))
             {
-               var input = String.Join(System.Environment.NewLine, File.ReadAllText(args[1], Encoding));
-               var dict = CharacterFrequencyDictionary.CreateDictionary(input);
-               Console.WriteLine("Keys:");
-               Console.WriteLine(Convert.ToBase64String(dict.GetKeysAsByteArray()));
-               Console.WriteLine("Values:");
-               Console.WriteLine(Convert.ToBase64String(dict.GetValuesAsByteArray()));
+               ShowDictionaryKeyAndValueStrings(args[1]);
+               return;
             }
-            return;
+
+            if (String.Equals(args[0].Substring(1, 1), "c", StringComparison.OrdinalIgnoreCase))
+               CompressFile(args[1]);
+
+            if (String.Equals(args[0].Substring(1, 1), "d", StringComparison.OrdinalIgnoreCase))
+               DecompressFile(args[1]);
 
          }
          catch (FileNotFoundException ex)
@@ -42,52 +45,79 @@ namespace Compress
          {
             WriteUnhandledException(ex);
          }
+      }
 
+      private static void ShowDictionaryKeyAndValueStrings(string filename)
+      {
+         var input = String.Join(Environment.NewLine, File.ReadAllText(filename, Encoding));
+         var dict = CharacterFrequencyDictionary.CreateDictionary(input);
+         Console.WriteLine("Keys:");
+         Console.WriteLine(Convert.ToBase64String(dict.GetKeysAsByteArray()));
+         Console.WriteLine("Values:");
+         Console.WriteLine(Convert.ToBase64String(dict.GetValuesAsByteArray()));
+         Console.WriteLine("Any key to continue.");
+         Console.ReadKey();
 
+         return;
+      }
 
-         if (String.Equals(args[0].Substring(1,1), "c", StringComparison.OrdinalIgnoreCase))
+      private static void CompressFile(string inputFile)
+      {
+         var outputFile = inputFile + _compressFileExtension;
+
+         var input = String.Join(System.Environment.NewLine, File.ReadAllText(inputFile, Encoding));
+
+         var dict = CharacterFrequencyDictionary.CreateDictionary(input);
+
+         var fileHeader = CompressUtil.GetHeaderByteArray(dict);
+         var compressed = new HuffmanTree<char>(dict).Encode(input);
+         var fileByteArray = CompressUtil.GetFileByteArray(fileHeader, compressed);
+
+         using (var fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            fs.Write(fileByteArray, 0, fileByteArray.Length);
+      }
+
+      public static void DecompressFile(string fileName)
+      {
+         using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
          {
-            try
-            {
+            var keyLengthArray = new byte[4];
+            var valueLengthArray = new byte[4];
 
-            }
-            catch (FileNotFoundException ex)
-            {
-               WriteFileError(args[2]);
-            }
-            catch (Exception ex)
-            {
-               WriteUnhandledException(ex);
-            }
+            fs.Read(keyLengthArray, 0, 4);
+            fs.Read(valueLengthArray, 0, 4);
 
-            return;
+            var keyLength = BitConverter.ToInt32(keyLengthArray, 0);
+            var valueLength = BitConverter.ToInt32(valueLengthArray, 0);
+
+            var keyArray = new byte[keyLength];
+            var valueArray = new byte[valueLength];
+
+            fs.Read(keyArray, 0, keyLength);
+            fs.Read(valueArray, 0, valueLength);
+
+            var dict = CharacterFrequencyDictionary.CreateDictionaryFromByteArray(keyArray, valueArray);
+
+            var huffmanTree = new HuffmanTree<char>(dict);
+
+            var outputFile = fileName.Substring(0, (fileName.Length - _compressFileExtension.Length));
+
+            var encodedStream = new List<byte>();
+            int record;
+
+            while ((record = fs.ReadByte()) != -1)
+               encodedStream.AddRange(CompressUtil.ConvertToBitArray(record));
+
+            using (var fsw = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            using (var sr = new StreamWriter(fsw))
+               sr.Write(huffmanTree.Decode(encodedStream));
          }
-
-
-         if (String.Equals(args[0].Substring(1, 1), "d", StringComparison.OrdinalIgnoreCase))
-         {
-            try
-            {
-
-            }
-            catch (FileNotFoundException ex)
-            {
-               WriteFileError(args[2]);
-            }
-            catch (Exception ex)
-            {
-               WriteUnhandledException(ex);
-            }
-
-            return;
-         }
-
       }
 
       public static void ShowHelp()
       {
          Console.Write(@"General usage:
-Compress.exe [-c | -d] -g INPUT_FILENAME OUTPUT_FILENAME
+CompressUtil.exe [-c | -d] -g INPUT_FILENAME OUTPUT_FILENAME
 
 -c compresses the file specified by INPUT_FILENAME into OUTPUT_FILENAME
 -d decompresses INPUT_FILENAME into OUTPUT_FILENAME

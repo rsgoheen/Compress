@@ -39,7 +39,7 @@ namespace Compress.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Compress.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CompressUtil.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,7 @@ namespace Compress.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to R0VNOC1VLEZBMDYzNDIuMTUNCkhCOTdaU0pUQ0xSWU5QS0lRVlhEOiBPVw==.
         /// </summary>
         internal static string DefaultDictionaryKeys {
             get {
@@ -70,7 +70,7 @@ namespace Compress.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to NjQ1MjcsMTUxMzQwLDEwNzI4OCwxNDU2MDgwLDM0Mjg5LDEyMTM3LDM1MDAwMDAsNTEzNDY1LDI1MTMxOSwxNDM1NzE3LDEyODk1NjgsOTMzMzIzLDk2NjYyMywxMDAxOTkxLDQ1MzQ5NSwxNDYxNzgxLDEwMTgwNjIsNTAwMDAwLDUwMDAwMCwzNzg5NjAsMjg4MzY5LDExMjg5NjUsMTA3NjIxNiwzODU4Miw3MDE1OCw5MTg2NywzOTg0Nyw1NjAyNCwyNzk1OSw2NDY3OSwzMjU4OSwzNzg1NiwyNzQ0OCwxNzM5Niw2OTc0LDMyMzM4LDM0MCwyNjcsMjMzMjMsMzEzNiw1MDY0LDE0MDA5LDE1Mw==.
         /// </summary>
         internal static string DefaultDictionaryValues {
             get {

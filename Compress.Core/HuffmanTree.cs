@@ -51,14 +51,14 @@ namespace Compress.Core
          Root = sortedNodes.FirstOrDefault();
       }
 
-      public List<byte> Encode(IEnumerable<T> input)
+      public byte[] Encode(IEnumerable<T> input)
       {
          var list = new List<byte>();
 
          foreach (var item in input)
             list.AddRange(EncodeElement(item));
 
-         return list;
+         return list.ToArray();
       }
 
       private IEnumerable<byte> EncodeElement(T item)
@@ -93,7 +93,5 @@ namespace Compress.Core
 
          return sb.ToString();
       }
-
-
    }
 }

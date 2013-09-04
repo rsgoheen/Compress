@@ -26,7 +26,7 @@ namespace Compress.Core
       public static CharacterFrequencyDictionary CreateDictionaryFromByteArray(byte[] keyArray, byte[] valueArray)
       {
          var keys = Encoding.ASCII.GetString(keyArray).ToCharArray();
-         var values = Encoding.ASCII.GetString(valueArray).Split().Select(int.Parse).ToArray();
+         var values = Encoding.ASCII.GetString(valueArray).Split(',').Select(int.Parse).ToArray();
 
          if (keys.Length != values.Length)
             throw new ArgumentException(
