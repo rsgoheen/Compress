@@ -6,7 +6,7 @@ using Compress.Core;
 namespace Compress.Core.Test
 {
    [TestClass]
-   public class HuffingtonTreeTest
+   public class HuffmanTreeTest
    {
       [TestMethod]
       public void TestEncodeDecode()
